@@ -1,9 +1,8 @@
-# %%
 from bs4 import BeautifulSoup
 import requests
 import os
 
-DIR = '../data/full_pcaps'
+DIR = '../../data/full_pcaps'
 os.makedirs(DIR, exist_ok=True)
 
 url = 'https://mergetb.org/projects/searchlight/dataset/'
