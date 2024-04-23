@@ -55,4 +55,3 @@ def get_datafiles(nprints_dir, synthetic=False):
 	labelmap_encoded = {key: LabelEncoder().fit_transform(value) for key, value in labelmap_raw.items()}
 	datamap = {'data': datafiles, 'labels': labelmap_encoded}
 	return datamap
-# %%
