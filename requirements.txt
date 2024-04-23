@@ -1,0 +1,17 @@
+bs4
+tqdm
+requests
+jupyter
+ipykernel
+scapy
+numpy
+pandas
+matplotlib
+scikit-learn
+opencv-python
+torch
+torchvision
+diffusers
+transformers
+xformers
+peft
