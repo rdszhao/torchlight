@@ -1,4 +1,3 @@
-# %%
 import os
 import json
 from tqdm import tqdm
@@ -53,4 +52,3 @@ for image_name, canny_image, prompt in tqdm(image_labels):
         image.save(f"../../data/synthesized_imgs/{image_name.split('.')[0]}_{i}.png")
 
 print('done.')
-# %%

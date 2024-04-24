@@ -16,7 +16,7 @@ base_output_dir = 'results/base_results.json'
 synth_output_dir = 'results/synth_results.json'
 realfake_output_dir = 'results/realfake_results.json'
 datafiles = get_datafiles(real_nprints_dir)
-traindata = get_datafiles(synth_nprints_dir, synth=True)
+traindata = get_datafiles(synth_nprints_dir, synthetic=True)
 
 results = defaultdict(dict)
 for label, Y in tqdm(datafiles['labels'].items()):
