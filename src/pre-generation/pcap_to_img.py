@@ -133,14 +133,12 @@ for file in os.listdir(pcap_dir):
             print(e)
             continue
 
+print('making captions...')
 captions = []
-for file in os.listdir(finetune_nprint_dir):
-	if '.nprint' in file:
-		filename = file.split('-')[0] 
-		new_name = f"{filename}.png"
-		os.rename(f"{img_dir}/{file}", f"{img_dir}/{new_name}")
-		caption = f"pixelated network data: {file.split('-')[-3]}, {file.split('.')[-4]}, {file.split('.')[-2]}" 
-		entry = {'file_name': new_name, 'text': caption}
+for file in os.listdir(img_dir):
+	if '.png' in file:
+		caption = f"pixelated network data: {file.split('-')[-3]}, {file.split('.')[-4]}, {file.split('.')[-3]} {file.split('.')[-2]}" 
+		entry = {'file_name': file, 'text': caption}
 		captions.append(entry)
 
 with open(f"{img_dir}/metadata.jsonl", 'w') as f:

@@ -1,14 +1,14 @@
 # Fdb version 3
-["bibtex torchlight"] 0 "torchlight.aux" "torchlight.bbl" "torchlight" 1715050162
+["bibtex torchlight"] 0 "torchlight.aux" "torchlight.bbl" "torchlight" 1715061211
   "./ACM-Reference-Format.bst" 1715068766 90333 86eaa0e4fdb37f9b776e2166aab73ed4 ""
   "sample-base.bib" 1715068766 53302 5d037f7e7c4d2e7300948da50a9972ca ""
   "torchlight.aux" 0 -1 0 "pdflatex"
   (generated)
-  "torchlight.bbl"
   "torchlight.blg"
-["pdflatex"] 1715050161 "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.tex" "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.pdf" "torchlight" 1715050162
-  "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.aux" 1715050161 8 a94a2480d3289e625eea47cd1b285758 ""
-  "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.tex" 1715050161 11313 bc64bca2a2e593b23551352425659e0c ""
+  "torchlight.bbl"
+["pdflatex"] 1715061210 "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.tex" "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.pdf" "torchlight" 1715061211
+  "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.aux" 1715061210 8 a94a2480d3289e625eea47cd1b285758 ""
+  "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.tex" 1715061210 12499 68bbb850addf624e791def57e1dde57d ""
   "/usr/local/texlive/2020basic/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc" 1558214095 7693 0f2dce6d313c82989ec3a67fc24df2a0 ""
   "/usr/local/texlive/2020basic/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc" 1490131464 2921 8ca0eb0831f9bc5da080d3697cfe67bf ""
   "/usr/local/texlive/2020basic/texmf-dist/fonts/enc/dvips/libertine/lbtn_76gpa5.enc" 1490131464 2933 9ad527ce78d7c5fa0a642dead095f172 ""
@@ -189,17 +189,17 @@
   "/usr/local/texlive/2020basic/texmf-var/web2c/pdftex/pdflatex.fmt" 1599441135 2444432 6ce0c84780ef5e91d3788fa24894fb12 ""
   "/usr/local/texlive/2020basic/texmf.cnf" 1586277716 628 4346f9a816ba8e5dc36d93d5100b369e ""
   "acmart.cls" 1715068766 119546 70d0ff49a7f114b7c5ddcef04ac4e869 ""
-  "comment.cut" 1715050161 80 9a3e6de8605d45f63d6e7d47417faa05 "pdflatex"
+  "comment.cut" 1715061211 80 9a3e6de8605d45f63d6e7d47417faa05 "pdflatex"
   "sample-franklin.png" 1715068766 95030 f1181da200d46c167abc0e8e46a0a4c8 ""
   "torchlight.aux" 0 -1 0 "pdflatex"
   "torchlight.bbl" 1715047126 19546 fe52309052de6949436347dbb513a6c7 "bibtex torchlight"
   "torchlight.out" 0 -1 0 "pdflatex"
-  "torchlight.tex" 1715050161 11313 bc64bca2a2e593b23551352425659e0c ""
+  "torchlight.tex" 1715061210 12499 68bbb850addf624e791def57e1dde57d ""
   (generated)
-  "comment.cut"
-  "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.log"
   "torchlight.aux"
   "torchlight.log"
-  "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.pdf"
-  "torchlight.out"
+  "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.log"
+  "comment.cut"
   "torchlight.pdf"
+  "torchlight.out"
+  "/Users/rdz/Documents/edu/coursework/spr2024/dsci599/project/paper/torchlight.pdf"

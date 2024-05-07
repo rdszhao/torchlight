@@ -9,6 +9,7 @@ def get_label(file):
 	labels = {
 		'encryption': file.split('-')[-3],
 		'resolution': file.split('.')[-4],
+		'streaming': file.split('.')[-3], # 'h264' or 'vp8
 		'transport': file.split('.')[-2] 
 	}
 	return labels
@@ -18,7 +19,8 @@ def labelfy(str):
 	labels = {
 		'encryption': labels[0],
 		'resolution': labels[1],
-		'transport': labels[2] 
+		'streaming': labels[2],
+		'transport': labels[3] 
 	}
 	return labels
 

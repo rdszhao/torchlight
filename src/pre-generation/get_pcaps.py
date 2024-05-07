@@ -22,7 +22,7 @@ print(f"Filtering for links containing {keywords}")
 filtered_links = [link for link in links if all(keyword in link for keyword in keywords)]
 
 # 148 + 15 + ?
-for link in tqdm(filtered_links):
+for link in tqdm(filtered_links[148 + 15 + 113 + 132:]):
     filename = link.split('/')[-1]
     filepath = os.path.join(DIR, filename)
     print(f'Downloading {filename}...')

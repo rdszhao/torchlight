@@ -9,7 +9,7 @@
 %% end of the preamble, start of the body of the document source.
 \begin{document}
 
-\title{Torchlight: Diffusion-based Traffic Generation on DARPA Searchlight}
+\title{Torchlight: Diffusion-based Network Trace Generation from the DARPA Searchlight Dataset}
 
 \author{Ray Zhao}
 \affiliation{%
@@ -47,38 +47,50 @@
 \maketitle
 
 \section{Introduction}
-ACM's consolidated article template, introduced in 2017, provides a
-consistent \LaTeX\ style for use across ACM publications, and
-incorporates accessibility and metadata-extraction functionality
-necessary for future Digital Library endeavors. Numerous ACM and
-SIG-specific \LaTeX\ templates have been examined, and their unique
-features incorporated into this single new template.
+There's a large need and general scarcity of labeled network datasets,
+as high-quality data is often expensive and frought with privacy concerns,
+and the datasets that do exist are often left rarely update over time.
+Synthetic data generation techniques aim to solve this problem, but prior
+GAN based methodologies have been limited in their ability to generate
+raw, high-dimensional traces and often rely on aggregating flow characteristics,
+which results in data that lacks statistical fidelity to real data and performs
+much more poorly in machine learning tasks. The highly specific formatting of
+these types of condensed traces also renders them generally incompatible with
+traditional tools like Wireshark and tcpdump.
 
-If you are new to publishing with ACM, this document is a valuable
-guide to the process of preparing your work for publication. If you
-have published with ACM before, this document provides insight and
-instruction into more recent changes to the article template.
+In recent years, the advent of diffusion models have solved many of the
+problems that plague older GAN frameworks, being able to capture much
+more complex patterns and relationships. They also usually offer much more
+stability in the training process, in which GANs are notably finnicky.
+Additionally, their now near-hegemony in the image generation space has
+enabled a wide base of development support in the diffusion community 
+and has also made available many "plug and play"
+means of constraining generation to appropriate enough scopes for specific generation
+tasks like the one at hand.
 
-The ``\verb|acmart|'' document class can be used to prepare articles
-for any ACM publication --- conference or journal, and for any stage
-of publication, from review to final ``camera-ready'' copy, to the
-author's own version, with {\itshape very} few changes to the source.
+As it pertains to Torchlight, we build on the NetDiffusion framework pioneered
+by Jiang et al. \cite{Jiang2024} to generate synthetic network traces for video
+streaming applications, using the DARPA Searchlight dataset \cite{Ardi2022} as
+our base. Our contributions are as follows:
+\begin{enumerate}
+  \item \textbf{Successful application of NetDiffusion techniques on the Searchlight Dataset}:
+  Using the pre-processing and post-processing code provided by Jiang et al., we were able to
+  successfully generate synthetic traces that performed capably on its own as training
+  data for classification tasks as well as when used in conjunction with real data 
+  as augmentation.
+  \item \textbf{Streamlining the generation process}: While the original NetDiffusion codebase
+  used exterrnally-built WebUIs for LoRA fine-tuning as well as the Controlnet, 
+  these two major components were integrated into the codebase such that the 
+  entire process can be run from a single script.
 
-\section{Motivation}
-As noted in the introduction, the ``\verb|acmart|'' document class can
-be used to prepare many different kinds of documentation --- a
-double-anonymous initial submission of a full-length technical paper, a
-two-page SIGGRAPH Emerging Technologies abstract, a ``camera-ready''
-journal article, a SIGCHI Extended Abstract, and more --- all by
-selecting the appropriate {\itshape template style} and {\itshape
-  template parameters}.
+\section{Motivation \& Related Work}
+Publicly available network data is crucial in this field for enabling continued
+researhc and development of new networking technologies and techniques. While useful for
+more traditional networking analysis tasks, machine learning applications have been driving
+much of the development in use-cases like anomaly detection and traffic classification and 
+in particular have largely relied on these datasets.
 
-This document will explain the major features of the document
-class. For further information, the {\itshape \LaTeX\ User's Guide} is
-available from
-\url{https://www.acm.org/publications/proceedings-template}.
-
-\subsection{Template Styles}
+\subsection{Cost and Scarcity}
 
 The primary parameter given to the ``\verb|acmart|'' document class is
 the {\itshape template style} which corresponds to the kind of publication
