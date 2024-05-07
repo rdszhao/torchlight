@@ -96,27 +96,21 @@ def rgba_to_int(rgba):
 def split_bits(s):
     return [int(b) for b in s]
 
-data_dir = '../data'
+data_dir = '../../data'
 pcap_dir = f"{data_dir}/full_pcaps"
-full_nprint_dir = f"{data_dir}/full_nprints"
+# full_nprint_dir = f"{data_dir}/full_nprints"
 finetune_nprint_dir = f"{data_dir}/finetune_nprints"
 img_dir = f"{data_dir}/finetune_imgs"
 os.makedirs(os.path.dirname(img_dir), exist_ok=True)
-
-output = f"{data_dir}/captions.json"
-captions = {file.split('-')[0]: f"{file.split('-')[-3]}, {file.split('.')[-4]}, {file.split('.')[-2]}" for file in os.listdir(pcap_dir)}
-
-with open (output, 'w') as f:
-	json.dump(captions, f)
 
 for file in os.listdir(pcap_dir):
     print(file)
     filename = file.split('.pcap')[0]
     pcap_filename = f"{pcap_dir}/{file}"
-    full_nprint_filename = f"{full_nprint_dir}/{filename}.nprint"
+    # full_nprint_filename = f"{full_nprint_dir}/{filename}.nprint"
     finetune_nprint_filename = f"{finetune_nprint_dir}/{filename}.nprint"
     print(f"creating nprint for {pcap_filename}")
-    subprocess.Popen(f"nprint -F -1 -P {pcap_filename} -4 -i -6 -t -u -p 0 -W {full_nprint_filename}", shell=True)
+    # subprocess.Popen(f"nprint -F -1 -P {pcap_filename} -4 -i -6 -t -u -p 0 -W {full_nprint_filename}", shell=True)
     subprocess.Popen(f"nprint -F -1 -P {pcap_filename} -4 -i -6 -t -u -p 0 -c 1024 -W {finetune_nprint_filename}", shell=True).wait()
     print('done.')
 
@@ -138,3 +132,18 @@ for file in os.listdir(pcap_dir):
         except Exception as e:
             print(e)
             continue
+
+captions = []
+for file in os.listdir(finetune_nprint_dir):
+	if '.nprint' in file:
+		filename = file.split('-')[0] 
+		new_name = f"{filename}.png"
+		os.rename(f"{img_dir}/{file}", f"{img_dir}/{new_name}")
+		caption = f"pixelated network data: {file.split('-')[-3]}, {file.split('.')[-4]}, {file.split('.')[-2]}" 
+		entry = {'file_name': new_name, 'text': caption}
+		captions.append(entry)
+
+with open(f"{img_dir}/metadata.jsonl", 'w') as f:
+	for entry in captions:
+		json.dump(entry, f)
+		f.write('\n')

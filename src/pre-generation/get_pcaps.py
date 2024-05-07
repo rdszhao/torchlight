@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 import requests
+import yaml
 import os
 
 DIR = '../../data/full_pcaps'
@@ -12,10 +14,15 @@ soup = BeautifulSoup(response.content, 'html.parser')
 
 links = [a['href'] for a in soup.find_all('a', href=True) if a['href'].endswith('.pcap')]
 
-keywords = ['ptp', 'tiered', 'video', 'dash']
+with open('keywords.yaml', 'r') as f:
+    file = yaml.safe_load(f)
+
+keywords = file['keywords']
+print(f"Filtering for links containing {keywords}")
 filtered_links = [link for link in links if all(keyword in link for keyword in keywords)]
 
-for link in filtered_links:
+# 148 + 15 + ?
+for link in tqdm(filtered_links):
     filename = link.split('/')[-1]
     filepath = os.path.join(DIR, filename)
     print(f'Downloading {filename}...')
