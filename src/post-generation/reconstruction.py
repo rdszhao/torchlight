@@ -10,6 +10,9 @@ from scapy.all import *
 from scapy.utils import PcapWriter
 from scapy.all import rdpcap, wrpcap
 from scapy.layers.inet import IP, TCP
+import warnings
+warnings.filterwarnings('ignore')
+
 
 def update_ipv4_checksum(pcap_file, output_file):
     # Read the packets from the pcap file
@@ -882,9 +885,6 @@ def main(generated_nprint_path, formatted_nprint_path, output, nprint):
     # Reindex the columns of generated_nprint to match the order of columns in formatted_nprint
     generated_nprint = generated_nprint.reindex(columns=formatted_nprint.columns)
 
-
-
-
     ##############################################################################Intra packet dependency adjustments#########################################################################
     ########### ip address formatting (we have flexibility here)
     synthetic_sequence = direction_sampleing(formatted_nprint_path)
@@ -918,8 +918,6 @@ def main(generated_nprint_path, formatted_nprint_path, output, nprint):
     ##############################################################################End of Intra packet dependency adjustments#########################################################################
 
 
-
-
     ############################################################################## Inter packet dependency adjustments#########################################################################
     # random initial identification number initial for first source to destination packet, use synthetic_sequence to keep track for the rest for increments
     generated_nprint = id_num_initialization_src_dst(generated_nprint)
@@ -945,7 +943,6 @@ def main(generated_nprint_path, formatted_nprint_path, output, nprint):
         # ports needs to be consistent but can be randomly generated
         generated_nprint = port_initialization(generated_nprint)
 
-
     ##############################################################################End of Inter packet dependency adjustments#########################################################################
 
 
@@ -962,9 +959,9 @@ def main(generated_nprint_path, formatted_nprint_path, output, nprint):
     # saved the formatted_generated_nprint and attempt reconstruction
     formatted_generated_nprint_path = nprint
     generated_nprint.to_csv(formatted_generated_nprint_path, index=False)
-    reconstruction_to_pcap(formatted_generated_nprint_path, rebuilt_pcap_path)
-    update_ipv4_checksum(rebuilt_pcap_path, rebuilt_pcap_path)    
-    subprocess.run('nprint -F -1 -P {0} -4 -i -6 -t -u -p 0 -c 1024 -W {1}'.format(rebuilt_pcap_path, formatted_generated_nprint_path), shell=True)
+    # reconstruction_to_pcap(formatted_generated_nprint_path, rebuilt_pcap_path)
+    # update_ipv4_checksum(rebuilt_pcap_path, rebuilt_pcap_path)    
+    # subprocess.run('nprint -F -1 -P {0} -4 -i -6 -t -u -p 0 -c 1024 -W {1}'.format(rebuilt_pcap_path, formatted_generated_nprint_path), shell=True)
     #reconstruction_to_pcap('/Users/chasejiang/Desktop/netdiffussion/replayability/meet_real.nprint', rebuilt_pcap_path)
     #reconstruction_to_pcap(formatted_nprint_path, rebuilt_pcap_path)
 

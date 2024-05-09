@@ -72,6 +72,7 @@ As it pertains to Torchlight, we build on the NetDiffusion framework pioneered
 by Jiang et al. \cite{Jiang2024} to generate synthetic network traces for video
 streaming applications, using the DARPA Searchlight dataset \cite{Ardi2022} as
 our base. Our contributions are as follows:
+
 \begin{enumerate}
   \item \textbf{Successful application of NetDiffusion techniques on the Searchlight Dataset}:
   Using the pre-processing and post-processing code provided by Jiang et al., we were able to
@@ -82,6 +83,7 @@ our base. Our contributions are as follows:
   used exterrnally-built WebUIs for LoRA fine-tuning as well as the Controlnet, 
   these two major components were integrated into the codebase such that the 
   entire process can be run from a single script.
+\end{enumerate}
 
 \section{Motivation \& Related Work}
 Publicly available network data is crucial in this field for enabling continued
@@ -91,179 +93,204 @@ much of the development in use-cases like anomaly detection and traffic classifi
 in particular have largely relied on these datasets.
 
 \subsection{Cost and Scarcity}
+Notable datasets like DARPA Searchlight and CAIDA have been essential 
+in the development of new networking technologies, but expensive and complex
+to develop and then maintain. Entities with the means to develop these datasets
+often have little incentive to release them to the public, as they are often
+highly proprietary and run into ethics concerns. Even when they are released, 
+they are often left to stagnate and lose relevance over time, as the networking
+landscape is highly dynamic.
 
-The primary parameter given to the ``\verb|acmart|'' document class is
-the {\itshape template style} which corresponds to the kind of publication
-or SIG publishing the work. This parameter is enclosed in square
-brackets and is a part of the {\verb|documentclass|} command:
-\begin{verbatim}
-  \documentclass[STYLE]{acmart}
-\end{verbatim}
+\subsection{Data Augmentation}
+In the absence of high-quality labeled data, data augmentation has been a popular
+technique, especially in computer vision, to extend the utility of exisiting
+and the models with which they are used. Synthetic data generation has been
+successful across domains, with GANs being dominant in the image generation space
+and autoencoders being popular in creating synthetic text data. 
 
-Journals use one of three template styles. All but three ACM journals
-use the {\verb|acmsmall|} template style:
-\begin{itemize}
-\item {\texttt{acmsmall}}: The default journal template style.
-\item {\texttt{acmlarge}}: Used by JOCCH and TAP.
-\item {\texttt{acmtog}}: Used by TOG.
-\end{itemize}
+The most notable application of synthetic data generation in networking has been
+in the realm of flow-based data, where the data is aggregated into flows and then
+used to generate synthetic data. This has been successful in some applications, 
+most notably NetShare \cite{NetShare}, which produces NetFlow-like aggregates 
+on network traffic. The limited dimensionality of these aggregates, however, 
+means much coaser-grained pattern capture and limited utility outside of 
+pure model training.
 
-The majority of conference proceedings documentation will use the {\verb|acmconf|} template style.
-\begin{itemize}
-\item {\texttt{sigconf}}: The default proceedings template style.
-\item{\texttt{sigchi}}: Used for SIGCHI conference articles.
-\item{\texttt{sigplan}}: Used for SIGPLAN conference articles.
-\end{itemize}
-
-\subsection{Template Parameters}
-
-In addition to specifying the {\itshape template style} to be used in
-formatting your work, there are a number of {\itshape template parameters}
-which modify some part of the applied template style. A complete list
-of these parameters can be found in the {\itshape \LaTeX\ User's Guide.}
-
-Frequently-used parameters, or combinations of parameters, include:
-\begin{itemize}
-\item {\texttt{anonymous,review}}: Suitable for a ``double-anonymous''
-  conference submission. Anonymizes the work and includes line
-  numbers. Use with the \texttt{\acmSubmissionID} command to print the
-  submission's unique ID on each page of the work.
-\item{\texttt{authorversion}}: Produces a version of the work suitable
-  for posting by the author.
-\item{\texttt{screen}}: Produces colored hyperlinks.
-\end{itemize}
-
-This document uses the following string as the first command in the
-source file:
-\begin{verbatim}
-\documentclass[acmsmall]{acmart}
-\end{verbatim}
+The original authors of NetDiffusion \cite{Jiang2024} have shown that
+NetFlow data performs poorly in classification tasks in comparison to raw 
+traffic data, and as such have been motivated to develop a new framework
+that can generate raw traces.
 
 \section{Methods}
+Here we outline the framework used in Torchlight to generate synthetic network traces,
+which is built atop NetDiffusion \cite{Jiang2024} and updates and streamlines it.
+Our approach is segmented into five primary moving parts:
 
-Modifying the template --- including but not limited to: adjusting
-margins, typeface sizes, line spacing, paragraph and list definitions,
-and the use of the \verb|\vspace| command to manually adjust the
-vertical spacing between elements of your work --- is not allowed.
+\begin{enumerate}
+  \item Conversion of raw network traces in \verb|.pcap| format into images
+  \item Fine-tuning a pretrained diffusion model with LoRA on the labelled images
+  \item ControlNet constrained generation of synthetic traces
+  \item Color correction and network compliance post-processing
+  \item Conversion of generated and processed images back into \verb|.pcap| format
+\end{enumerate}
+
+\subsection{Trace to Image Conversion}
+This work is anchored on the core concept of encapsulating raw network data
+into a dense image format. Pixels in images inherently form high-dimensional 
+patterns and structures with long-range, highly non-linear dependencies.
+While tabular formats typically engender points as indepedent entities, images 
+much more adeptly preserve temporal and spatial relationships between network
+flows that traditional tabular formats do not. Development in the image space has always been
+rapid and deep-learning and subsequent generative techniques have been refined 
+over time to capture these complex relationships. As importantly, this format
+allows us to exploit the maturity and computational throughput
+of image-based deep learning. Diffusion models are
+the newest and most powerful of these techniques, and have been shown to be of
+great utility in the image generation space. We will delve into more detail on
+this in the next section.
+
+Our image representation is expressed with the nPrint \cite{nPrint} format, which
+standardizes the irregular and high-dimensional network patterns of raw 
+traces into a consistent bit-mapped format, where the presence or absence of a bit
+in the packet header is denoted 1 or 0 respectively, and a missing header bit is
+represented as -1. The payload content is not encoded since it's often encrypted, 
+but size of payloads can be inferred from other encoded header fields. 
+With this, a sequence of pcaps is converted into a matrix which can be formatted
+as an image. A set bit (1), an unset bit (0), and a vacant bit (-1) are 
+represented by green, red, and blue respectively. 
+Due to the limitations in generative models’ capability to handle very high
+dimensional data and standard image processing practice, we group packets in 
+groups of 1024, resulting in a $1088 \times 1024$ image with each row of pixels
+representing a packet in the network traffic flow as shown in Figure 2. 
+
+\subsection{Model Fine-Tuning}
+\subsubsection{Why diffusion models?}
+Diffusion models fundamentally operate on the principle of iteratively updating
+a set of latent variables to approximate a true data distribution, taking
+a randomly initialized amount of noise and progressively refining it to
+generate an image. A differential equation is used to control the transformation
+of an initial noise vector $\mathbf{z}$ into a data point $\mathbf{x}$ over a 
+series of time steps. This process is modeled by estimating the gradient of the
+log-likelihood of the data with respect to the noise vector, and then using this
+gradient to update the noise vector. Diffusion models typically operate in the
+context of "text-to-image" synthesis, where a text prompt guides the 
+generation of an image by conditioning the noise vector on the text. This
+conditioning steers the data distribution from a general uniform prior distribution
+to a more specific one fitted to the text prompt.
+
+This process lends a number of advantages to diffusion, as opposed to other
+generative techniques. Diffusion models have been shown to be adept at capturing
+highly complex and intricate relationships and generating high-resolution
+images. The text conditioning also allows for a high degree of control over
+the generated images, as the text can be used to guide the generation process
+in a way that is not possible with other generative models. Lastly,
+diffusion models are highly stable and easy to train, as they do not require
+the adversarial training that GANs do, and are much less prone to mode collapse.
+Their stable gradient dynamics and ability to be seeded in training
+ensures not just consistent but reproducible training results.
+
+\subsubsection{Fine-tuning with LoRA.} Training a diffusion model from scratch
+is highly computationally intensive and expensive, especially considering that
+existing models are often trained on billions of images. While good for general
+applications, base models like Stable Diffusion are too broad for our purposes. 
+While a text prompt like "pixelated network data: dash, 1080" is what we end up 
+using in our end-stage model, the base model would produce something 
+like a pixelated image of a dash, which is not useful for our purposes. Low-Rank
+Adaptation (LoRA) is a technique that allows us to fine-tune a pre-trained model
+on a smaller dataset, which is much more computationally feasible. LoRA works by
+attaching a low-rank matrix to the model's parameters and then training just 
+the low-rank matrix on a new dataset. This allows us to adapt the stylistic and
+color characteristics of the model to our specific dataset without having to
+retrain the entire model.
+
+In the fine-tuning process, we attach to every image a caption that corresponds
+to the various characteristics of the image. For example, the image for
+a network flow using the Wireguard VPN streaming 1080p video using DASH over
+HTTP3 would be captioned "pixelated network data: wireguardptp, dash, 1080 hhtp3".
+Hundreds of such image-caption pairs are then used to fine-tune the model over
+the course of thousands of epochs to adapt the model to the specific 
+color and stylistic characteristics of the images used to fine-tune it. 
+The choice of caption is crucial and achieves two main objectives:
+it gives the model a specific vocabulary that reduces ambiguity and minimizes
+interference from the original word embeddings of the base model.
+
+\subsection{Constrained Generation}
+Even though fine-tuning can result in very high-quality output, it can
+be very abstract and deviate greatly from the stricter bounds of network 
+traffic data. To constrain the output, we can employ a ControlNet, which
+is a separate neural network that sits atop the diffusion model and
+modifies the output to be rigidly within the bounds defined by the 
+ControlNet. Generally, a ControlNet is trained on a specific type of
+spatial constraint, like poses, depth mapping, masks, or in our case,
+canny edge detection. In the case of canny edge detection, the ControlNet 
+takes as input a text prompt and the canny edges extracted from a sample image
+to use as "guardrails" to guide the diffusion model in generating the final image.
+ControlNet enables us to generate images that are not just high-quality,
+but also highly compliant with the structure of network traffic.
+
+insert controlnet figure here
+
+\subsection{Post-Processing}
+While the constrained diffusion model generates high-fidelity images
+that greatly \textit{resemble} network traffic, use outside of ML tasks
+require that the flows these images represent comply with network standards 
+and the multitudes of inter and intra packet dependices that enable use 
+in traditional networking applications. While ControlNet can do a lot to
+ensure resemblance, it cannot guarantee compliance. To this end, 
+we must apply a series
+of post-processing steps to the generated images to ensure that they are
+compliant with network standards. Broadly, these rules can be put into two
+categories:
+\begin{enumerate}
+  \item \textbf{Inter-Packet}: Rules that govern the sequencing between
+  header fields between packets in a flow, like the SYN / SYN-ACK handshake
+  that initiates a TCP connection, the incorrect alignment of which can
+  cause the connection to fail.
+  \item \textbf{Intra-Packet}: Rules that organize the structure of individual
+  packets, like the ordering of header fields within a packet and checksums
+  that ensure the integrity of the packet.
+\end{enumerate}
+
+Most of the work of creating a systematic approach that comprehensively 
+identifes and corrects these errors has been done by original 
+NetDiffusion authors, and we have largely built on their work in this
+area. The post-processing steps are fully automated and accomplished
+by traversing two intra-packet and inter-packet dependency trees built
+with domain knowledge. A notable challenge the authors faced was
+time-stamp assignment for packets, which was resolved by sampling 
+original timestamps from real data to produce similar timestamp distributions
+in the synthetic data. This post-processing ensures that the generated
+traffic can be smoothly converted into raw network formats and utilized
+in non-ML contexts.
+
+\subsection{Image to Trace Conversion}
+The final step in the process is to convert the generated images back
+into network traces and is relatively straightfoward.
+This is done by reversing the process used to convert
+the original traces into images. The generated images are first converted
+into nPrint format, and then the nPrint format is converted back into
+a sequence of pcaps. The post-processing steps ensure that the generated
+pcaps are compliant with network standards and can be used in traditional
+networking applications.
 
 \section{Evaluation}
+The assessment of this framework is done primarily in gauging its performance
+in machine learning classification tasks. While the original NetDiffusion paper
+goes into great detail about the performance of the generated in outside
+applications, we focus on the classification task as it is the most common
+use-case for synthetic data in networking.
 
-The ``\verb|acmart|'' document class includes the ``\verb|booktabs|''
-package --- \url{https://ctan.org/pkg/booktabs} --- for preparing
-high-quality tables.
+\subsection{Dataset Overview \& Generation}
+The data used is the DARPA Searchlight dataset \cite{Ardi2022}, which is a large
+collection of network traces from a variety of sources and applications. Searchlight
+was collected over a period of 6 months and contains a wide variety of traffic types,
+including video streaming, web browsing, and file transfers all coordinated on a 
+complex testbed that includes a variety of network devices and topologies, making it
+highly representative of real-world network traffic. We focus on video streaming
+traffic in our work.
 
-Table captions are placed {\itshape above} the table.
+\subsection{Classification Results}
 
-Because tables cannot be split across pages, the best placement for
-them is typically the top of the page nearest their initial cite.  To
-ensure this proper ``floating'' placement of tables, use the
-environment \textbf{table} to enclose the table's contents and the
-table caption.  The contents of the table itself must go in the
-\textbf{tabular} environment, to be aligned properly in rows and
-columns, with the desired horizontal and vertical rules.  Again,
-detailed instructions on \textbf{tabular} material are found in the
-\textit{\LaTeX\ User's Guide}.
-
-Immediately following this sentence is the point at which
-Table~\ref{tab:freq} is included in the input file; compare the
-placement of the table here with the table in the printed output of
-this document.
-
-\begin{table}
-  \caption{Frequency of Special Characters}
-  \label{tab:freq}
-  \begin{tabular}{ccl}
-    \toprule
-    Non-English or Math&Frequency&Comments\\
-    \midrule
-    \O & 1 in 1,000& For Swedish names\\
-    $\pi$ & 1 in 5& Common in math\\
-    \$ & 4 in 5 & Used in business\\
-    $\Psi^2_1$ & 1 in 40,000& Unexplained usage\\
-  \bottomrule
-\end{tabular}
-\end{table}
-
-To set a wider table, which takes up the whole width of the page's
-live area, use the environment \textbf{table*} to enclose the table's
-contents and the table caption.  As with a single-column table, this
-wide table will ``float'' to a location deemed more
-desirable. Immediately following this sentence is the point at which
-Table~\ref{tab:commands} is included in the input file; again, it is
-instructive to compare the placement of the table here with the table
-in the printed output of this document.
-
-\begin{table*}
-  \caption{Some Typical Commands}
-  \label{tab:commands}
-  \begin{tabular}{ccl}
-    \toprule
-    Command &A Number & Comments\\
-    \midrule
-    \texttt{{\char'134}author} & 100& Author \\
-    \texttt{{\char'134}table}& 300 & For tables\\
-    \texttt{{\char'134}table*}& 400& For wider tables\\
-    \bottomrule
-  \end{tabular}
-\end{table*}
-
-Always use midrule to separate table header rows from data rows, and
-use it only for this purpose. This enables assistive technologies to
-recognise table headers and support their users in navigating tables
-more easily.
-
-\section{Figures}
-
-The ``\verb|figure|'' environment should be used for figures. One or
-more images can be placed within a figure. If your figure contains
-third-party material, you must clearly identify it as such, as shown
-in the example below.
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{sample-franklin}
-  \caption{1907 Franklin Model D roadster. Photograph by Harris \&
-    Ewing, Inc. [Public domain], via Wikimedia
-    Commons. (\url{https://goo.gl/VLCRBB}).}
-  \Description{A woman and a girl in white dresses sit in an open car.}
-\end{figure}
-
-
-  % Some examples.  A paginated journal article \cite{Abril07}, an
-  % enumerated journal article \cite{Cohen07}, a reference to an entire
-  % issue \cite{JCohen96}, a monograph (whole book) \cite{Kosiur01}, a
-  % monograph/whole book in a series (see 2a in spec. document)
-  % \cite{Harel79}, a divisible-book such as an anthology or compilation
-  % \cite{Editor00} followed by the same example, however we only output
-  % the series if the volume number is given \cite{Editor00a} (so
-  % Editor00a's series should NOT be present since it has no vol. no.),
-  % a chapter in a divisible book \cite{Spector90}, a chapter in a
-  % divisible book in a series \cite{Douglass98}, a multi-volume work as
-  % book \cite{Knuth97}, a couple of articles in a proceedings (of a
-  % conference, symposium, workshop for example) (paginated proceedings
-  % article) \cite{Andler79, Hagerup1993}, a proceedings article with
-  % all possible elements \cite{Smith10}, an example of an enumerated
-  % proceedings article \cite{VanGundy07}, an informally published work
-  % \cite{Harel78}, a couple of preprints \cite{Bornmann2019,
-  %   AnzarootPBM14}, a doctoral dissertation \cite{Clarkson85}, a
-  % master's thesis: \cite{anisi03}, an online document / world wide web
-  % resource \cite{Thornburg01, Ablamowicz07, Poker06}, a video game
-  % (Case 1) \cite{Obama08} and (Case 2) \cite{Novak03} and \cite{Lee05}
-  % and (Case 3) a patent \cite{JoeScientist001}, work accepted for
-  % publication \cite{rous08}, 'YYYYb'-test for prolific author
-  % \cite{SaeediMEJ10} and \cite{SaeediJETC10}. Other cites might
-  % contain 'duplicate' DOI and URLs (some SIAM articles)
-  % \cite{Kirschmer:2010:AEI:1958016.1958018}. Boris / Barbara Beeton:
-  % multi-volume works as books \cite{MR781536} and \cite{MR781537}. A
-  % couple of citations with DOIs:
-  % \cite{2004:ITE:1009386.1010128,Kirschmer:2010:AEI:1958016.1958018}. Online
-  % citations: \cite{TUGInstmem, Thornburg01, CTANacmart}.
-  % Artifacts: \cite{R} and \cite{UMassCitations}.
-
-%%
-%% The acknowledgments section is defined using the "acks" environment
-%% (and NOT an unnumbered section). This ensures the proper
-%% identification of the section in the article metadata, and the
-%% consistent spelling of the heading.
 \begin{acks}
 To Alefiya, for the continual guidance and enthusiam all throughout
 the project
