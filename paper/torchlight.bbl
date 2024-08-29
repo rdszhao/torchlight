@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{0}
+\begin{thebibliography}{4}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -36,5 +36,62 @@
 \providecommand\bibinfo[2]{#2}
 \providecommand\natexlab[1]{#1}
 \providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Calvin~Ardi and Schwab.(2022)]%
+        {ardi2022}
+\bibfield{author}{\bibinfo{person}{Brian Kocoloski Dave DeAngelis Alefiya
+  Hussain Matt~Troglia Calvin~Ardi, Connor~Aubry} {and}
+  \bibinfo{person}{Stephen Schwab.}} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{The DARPA SEARCHLIGHT Dataset of Application
+  Network Traffic}.
+\newblock \bibinfo{journal}{\emph{Cyber Security Experimentation and Test
+  Workshop (CSET 2022)}} \bibinfo{volume}{8}, \bibinfo{number}{1}
+  (\bibinfo{year}{2022}), \bibinfo{pages}{1--32}.
+\newblock
+
+
+\bibitem[Holland et~al\mbox{.}({[n.\,d.]})]%
+        {holland2022towards}
+\bibfield{author}{\bibinfo{person}{Jordan Holland}, \bibinfo{person}{Paul
+  Schmitt}, \bibinfo{person}{Prateek Mittal}, {and} \bibinfo{person}{Nick
+  Feamster}.} \bibinfo{year}{[n.\,d.]}\natexlab{}.
+\newblock \showarticletitle{Towards Reproducible Network Traffic Analysis}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2203.12410}}
+  (\bibinfo{year}{[n.\,d.]}).
+\newblock
+
+
+\bibitem[Jiang et~al\mbox{.}(2024)]%
+        {jiang2024netdiffusion}
+\bibfield{author}{\bibinfo{person}{Xi Jiang}, \bibinfo{person}{Shinan Liu},
+  \bibinfo{person}{Aaron Gember-Jacobson}, \bibinfo{person}{Arjun~Nitin
+  Bhagoji}, \bibinfo{person}{Paul Schmitt}, \bibinfo{person}{Francesco
+  Bronzino}, {and} \bibinfo{person}{Nick Feamster}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{NetDiffusion: Network Data Augmentation Through
+  Protocol-Constrained Traffic Generation}.
+\newblock \bibinfo{journal}{\emph{Proceedings of the ACM on Measurement and
+  Analysis of Computing Systems}} \bibinfo{volume}{8}, \bibinfo{number}{1}
+  (\bibinfo{year}{2024}), \bibinfo{pages}{1--32}.
+\newblock
+
+
+\bibitem[Yin et~al\mbox{.}(2022)]%
+        {netshare-sigcomm2022}
+\bibfield{author}{\bibinfo{person}{Yucheng Yin}, \bibinfo{person}{Zinan Lin},
+  \bibinfo{person}{Minhao Jin}, \bibinfo{person}{Giulia Fanti}, {and}
+  \bibinfo{person}{Vyas Sekar}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{Practical GAN-Based Synthetic IP Header Trace
+  Generation Using NetShare}. In \bibinfo{booktitle}{\emph{Proceedings of the
+  ACM SIGCOMM 2022 Conference}} (Amsterdam, Netherlands)
+  \emph{(\bibinfo{series}{SIGCOMM '22})}. \bibinfo{publisher}{Association for
+  Computing Machinery}, \bibinfo{address}{New York, NY, USA},
+  \bibinfo{pages}{458–472}.
+\newblock
+\showISBNx{9781450394208}
+\urldef\tempurl%
+\url{https://doi.org/10.1145/3544216.3544251}
+\showDOI{\tempurl}
+
 
 \end{thebibliography}

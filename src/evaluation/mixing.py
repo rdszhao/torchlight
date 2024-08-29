@@ -1,16 +1,17 @@
 # %%
-import numpy as np
 import json
 from collections import defaultdict
-from clf_tools import get_datafiles
-from tqdm import tqdm
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-import matplotlib.pyplot as plt
-import seaborn as sns
+from xgboost import XGBClassifier
+from tqdm import tqdm
+
+from clf_tools import get_datafiles, mix_data
 
 sns.set_theme(style="whitegrid")
 # %%
@@ -23,17 +24,6 @@ realfake_output_dir = 'results/realfake_results.json'
 
 realdata, realkeys = get_datafiles(real_nprints_dir, return_keys=True)
 synthdata, synthkeys = get_datafiles(synth_nprints_dir, return_keys=True)
-
-def mix_data(realdata, synthdata, realkeys, synthkeys, n=32):
-	n = int(n * realdata['data'].shape[0])
-	synarr = np.array([f"{item.split('_')[0]}.nprint" for item in synthkeys])
-	to_replace = np.random.choice(len(realkeys), n, replace=False)
-	available_indices = [(synarr == realkeys[idx]).nonzero()[0] for idx in to_replace]
-	replacing_indices = [np.random.choice(indices, 1)[0] for indices in available_indices]
-
-	copydata = realdata['data'].copy()
-	copydata[to_replace] = synthdata['data'][replacing_indices]
-	return copydata
 # %%
 mixing_rates = np.arange(0, 1, 0.1)
 results = defaultdict(list)
@@ -55,7 +45,7 @@ with open(mix_output_dir, 'w') as f:
 
 print('trained on mixed data, tested on real data')
 print(json.dumps(results, indent=4))
-# %%
+
 fig, ax = plt.subplots()
 for key, entry in results.items():
 	sns.lineplot(x=[item[0] for item in entry], y=[item[1] for item in entry], label=key, ax=ax, marker='o')

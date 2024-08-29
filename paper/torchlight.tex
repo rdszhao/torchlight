@@ -1,6 +1,9 @@
-\documentclass[acmsmall, nonacm]{acmart}
+% \documentclass[sigconf, screen, review]{acmart}
+\documentclass[sigconf, nonacm]{acmart}
+\usepackage{colortbl}
+\usepackage{dblfloatfix}
+\usepackage{placeins}
 
-% %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
   \providecommand\BibTeX{{%
@@ -11,20 +14,20 @@
 
 \title{Torchlight: Diffusion-based Network Trace Generation from the DARPA Searchlight Dataset}
 
-\author{Ray Zhao}
-\affiliation{%
- \institution{University of Southern California}
- \city{Los Angeles}
- \state{California}
- \country{}}
-\email{rdzhao@usc.edu}
+% \author{Ray Zhao}
+% \affiliation{%
+%  \institution{University of Southern California}
+%  \city{Los Angeles}
+%  \state{California}
+%  \country{}}
+% \email{rdzhao@usc.edu}
 
-\author{Alefiya Hussain}
-\affiliation{%
-  \institution{USC/ISI}
-  \city{Los Angeles}
-  \country{}}
-\email{hussain@isi.edu}
+% \author{Alefiya Hussain}
+% \affiliation{%
+%   \institution{USC/ISI}
+%   \city{Los Angeles}
+%   \country{}}
+% \email{hussain@isi.edu}
 
 \renewcommand{\shortauthors}{Zhao, Hussain}
 
@@ -38,7 +41,8 @@
   synthetic data for usage both on its own and layered in with real data as augmentation.
   In this paper, we present Torchlight, a diffusion-based
   generation framework built atop and extending techniques first introduced in 
-  \textit{NetDiffusion} \cite{Jiang2024} using DARPA Searchlight \cite{Ardi2022} data to generate synthetic network traces
+  \textit{NetDiffusion} \cite{jiang2024netdiffusion} using DARPA Searchlight 
+  \cite{ardi2022} data to generate synthetic network traces
   for video streaming applications. We demonstrate the efficacy of Torchlight in generating
   synthetic network traces that reasonably resemble real-world data and perform notably well
   in classification tasks. 
@@ -69,8 +73,8 @@ means of constraining generation to appropriate enough scopes for specific gener
 tasks like the one at hand.
 
 As it pertains to Torchlight, we build on the NetDiffusion framework pioneered
-by Jiang et al. \cite{Jiang2024} to generate synthetic network traces for video
-streaming applications, using the DARPA Searchlight dataset \cite{Ardi2022} as
+by Jiang et al. \cite{jiang2024netdiffusion} to generate synthetic network traces for video
+streaming applications, using the DARPA Searchlight dataset \cite{ardi2022} as
 our base. Our contributions are as follows:
 
 \begin{enumerate}
@@ -111,19 +115,19 @@ and autoencoders being popular in creating synthetic text data.
 The most notable application of synthetic data generation in networking has been
 in the realm of flow-based data, where the data is aggregated into flows and then
 used to generate synthetic data. This has been successful in some applications, 
-most notably NetShare \cite{NetShare}, which produces NetFlow-like aggregates 
+most notably NetShare \cite{netshare-sigcomm2022}, which produces NetFlow-like aggregates 
 on network traffic. The limited dimensionality of these aggregates, however, 
 means much coaser-grained pattern capture and limited utility outside of 
 pure model training.
 
-The original authors of NetDiffusion \cite{Jiang2024} have shown that
+The original authors of NetDiffusion \cite{jiang2024netdiffusion} have shown that
 NetFlow data performs poorly in classification tasks in comparison to raw 
 traffic data, and as such have been motivated to develop a new framework
 that can generate raw traces.
 
 \section{Methods}
 Here we outline the framework used in Torchlight to generate synthetic network traces,
-which is built atop NetDiffusion \cite{Jiang2024} and updates and streamlines it.
+which is built atop NetDiffusion \cite{jiang2024netdiffusion} and updates and streamlines it.
 Our approach is segmented into five primary moving parts:
 
 \begin{enumerate}
@@ -149,7 +153,7 @@ the newest and most powerful of these techniques, and have been shown to be of
 great utility in the image generation space. We will delve into more detail on
 this in the next section.
 
-Our image representation is expressed with the nPrint \cite{nPrint} format, which
+Our image representation is expressed with the nPrint \cite{holland2022towards} format, which
 standardizes the irregular and high-dimensional network patterns of raw 
 traces into a consistent bit-mapped format, where the presence or absence of a bit
 in the packet header is denoted 1 or 0 respectively, and a missing header bit is
@@ -228,8 +232,6 @@ to use as "guardrails" to guide the diffusion model in generating the final imag
 ControlNet enables us to generate images that are not just high-quality,
 but also highly compliant with the structure of network traffic.
 
-insert controlnet figure here
-
 \subsection{Post-Processing}
 While the constrained diffusion model generates high-fidelity images
 that greatly \textit{resemble} network traffic, use outside of ML tasks
@@ -274,36 +276,213 @@ pcaps are compliant with network standards and can be used in traditional
 networking applications.
 
 \section{Evaluation}
-The assessment of this framework is done primarily in gauging its performance
+The assessment of this framework is done primarily in 2 ways: assessing
+the statistical differences between the original and synthesized data and
+gauging its performance
 in machine learning classification tasks. While the original NetDiffusion paper
 goes into great detail about the performance of the generated in outside
-applications, we focus on the classification task as it is the most common
-use-case for synthetic data in networking.
+applications, we focus on a statistical analysis and classification performance,
+arugably the most common use-case for synthetic data in networking.
 
 \subsection{Dataset Overview \& Generation}
-The data used is the DARPA Searchlight dataset \cite{Ardi2022}, which is a large
+The data used is the DARPA Searchlight dataset \cite{ardi2022}, which is a large
 collection of network traces from a variety of sources and applications. Searchlight
 was collected over a period of 6 months and contains a wide variety of traffic types,
 including video streaming, web browsing, and file transfers all coordinated on a 
 complex testbed that includes a variety of network devices and topologies, making it
-highly representative of real-world network traffic. We focus on video streaming
-traffic in our work.
+highly representative of real-world network traffic. 
+
+We focus on video streaming
+using tiered topology traffic in our work. All data is routed through a VPN, configured
+in either \textit{site-to-site} (STS) or \textit{point-to-point} (PTP) 
+configuration, and a variety of video resolutions and streaming and transport
+protocols were used, all of which are shown in Table 1. In lieu of "micro-level" 
+and "macro-level" service distinctions as made in the original NetDiffusion paper, 
+we use these different labels to evaluate statistical differences and
+classification performance 
+
+There are 342 video experiments using tiered topology to record video traffic. 10
+images were synthesized with the canny edges from each "parent" image, resulting in 
+3420 total synthetic samples.
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{@{}ll@{}}
+      \midrule
+    \textbf{Category} & \textbf{Classes} \\ \midrule
+    \textbf{Encryption (VPN)} & {IpsecPTP, WireguardPTP, WireguardSTS} \\
+    \textbf{Resolution} & 576p, 720p, 1080p \\
+    \textbf{Streaming Protocol} & DASH, HLS, HTML5 \\
+    \textbf{Transport Protocol} & HTTP/1.1, HTTP/1.1+TLS, HTTP/2, HTTP/3  \\
+    \bottomrule
+    \end{tabular}
+    \caption{Relevant Categories and their Classes}
+    \label{tab:config_features}
+\end{table}
+
+\subsection{Statistical Analysis}
+The core premise of generating synthetic data is to try to achieve a robust
+statistical resemblance to the original data. The statistical measure we opt 
+for is Jensen-Shannon distance (JSD), which is a symmetric and finite measure of
+the similarity between two probability distributions. The JSD between two distributions
+is calculated by first computing the KL divergence between the two distributions and 
+taking the average. The JSD is bounded between 0 and 1, with
+0 indicating that the two distributions are identical and 1 indicating that the
+two distributions are completely different. In our case, we take the JSD between each
+synthetic example and its "parent" image that provided edges to the ControlNet.
+
+\begin{figure*}[htbp]
+\includegraphics[width=1\textwidth]{../src/evaluation/figures/jsd_violin.png}
+\caption{Jensen-Shannon Distance Between Real and Generated Data}
+\label{fig:jsd_violin}
+\end{figure*}
+\FloatBarrier
+
+Interestingly enough, the deviations tend to be bimodal, with large amounts
+centered around 0.10 or around 0.20. The syntheitc data seems to generally capture
+resolution and streaming information relatively uniformly while for encryption and transport
+it seems to perform markedly better on some classes and worse on others.
 
 \subsection{Classification Results}
+For classification tasks, we use three main models: decision trees, random forests,
+support vector machines. Accuracy is the metric used, as classes are exactly balanced
+and accuracy is a good measure of overall performance. A model is trained for every 
+category, performing multi-class classification at each instance. We tested performance
+in four distinct scenarios:
 
-\begin{acks}
-To Alefiya, for the continual guidance and enthusiam all throughout
-the project
-\end{acks}
+\begin{enumerate}
+  \item \textbf{Train on real data, test on real data}:
+  Using 5-fold cross validation done over 10 runs, 
+  evaluate multi-class performance on all three models on every category, giving
+  a clear baseline as to how well the models can perform on the original data.
+  \item \textbf{Train on synthetic data, test on real data}: Using traditional 
+  train-test splitting at a 4:1 ratio,
+  done over 100 runs, we train each model using only synthetic data and test on real
+  data, maintaining the size (342) to ensure a fair comparison
+  \item \textbf{Train on real data, test on synthetic data}: Using traditional 
+  train-test splitting at a 4:1 ratio, done over 100 runs, we train each model using real
+  data and test on synthetic data, maintaining the size (342) to ensure a fair comparison.
+  \item \textbf{Mixed data proporrtions}: Using traditional train-test splitting at a 4:1 ratio
+  done over 100 runs, after splitting, we replace some proportion $p$ of the training
+  data with synthetic data, where $p \in \{0.1, \ldots, 0.9\}$ and test on all real 
+  data with random forests to evaluate performance in a data augmentation scenario.
+\end{enumerate}
+
+\subsubsection{Results on no \& complete synthetic data usage}: The results presented
+in Table 2 illustrate that our data performs reasonably well in classification tasks. 
+The drop in performance when using synthetic data is expected, as the synthetic data
+is not perfect and will not capture all the intricacies of the real data. The drop
+in performance is most pronounced in the encryption and transport categories, which
+is likely due to the complexity of these categories and the difficulty in capturing
+the nuances of these categories in the synthetic data. The performance of the models
+doesn't deviate as much for resolution and streaming, which the real/real models don't
+perform as well on in their own right. Lastly an interesting comparison is the
+performance of the models trained on real data and tested on synthetic data, which
+actually relatively closely to the performance of the models trained on synthetic data,
+which shows that the synthetic data is still able to capture a robust amount of 
+the patterns inherent in the real data.
+
+% \begin{table}[h!]
+%   \centering
+%   \begin{tabular}{lllll}
+%   \toprule
+%   \textbf{category} & \textbf{real/real} & \textbf{synthetic/real} & \textbf{real/synthetic} \\ \midrule
+%   \multirow{encryption}   & 1.00 & 0.615 & 0.555 \\
+%   \multirow{resolution} & 0.361 & 0.336 & 0.385 \\
+%   \multirow{streaming} & 0.345 & 0.345 & 0.342 \\
+%   \multirow{transport} & 0.803 & 0.296 & 0.302 \\
+%   \bottomrule \\
+%   \end{tabular}
+%   \caption{The best performance of different models on various training and testing scenarios}
+%   \end{table}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lllll}
+\toprule
+\textbf{category} & \textbf{real/real} & \textbf{synthetic/real} & \textbf{real/synthetic} \\ \midrule
+encryption   & 1.00 & 0.615 & 0.555 \\
+resolution & 0.361 & 0.336 & 0.385 \\
+streaming & 0.345 & 0.345 & 0.342 \\
+transport & 0.803 & 0.296 & 0.302 \\
+\bottomrule \\
+\end{tabular}
+\caption{The best performance of different models on various training and testing scenarios}
+\end{table}
+
+
+\subsubsection{Results on mixed data}: Presented in Figure 2 is the performance of 
+the random forest model as the mixing rate goes from 0 to 1, and observable is the 
+progression of performance. Notably encryption stays relatively stable until all of 
+the data is replaced and streaming protocol actually improves with a small amount
+of synthetic data and then falls off quickly as more real data is replaced. 
+Resolution reamins relatively stable all throughout and streaming actually 
+improves near monotonically with the addition of synthetic data. This
+also provides an extension to the performance comparisons in Table 2, 
+showing that the synthetic data can be used effectively as an augmentation
+tool.
+
+\begin{figure}[h!]
+\includegraphics[width=0.5\textwidth]{../src/evaluation/figures/mixing.png}
+\caption{Performance of RF on Mixed Data Proportions}
+\label{fig:data_mixing}
+\end{figure}
+\FloatBarrier
+
+\subsubsection{Feature Comparisons}
+Another useful way to observe the fidelity of the synthetic data is to compare
+the feature importance of the models trained on real and synthetic data.
+Using random forests and training over 100 runs, we take the 10 most important
+features of each run and collect the 10 most commonly occuring features.
+We see that there's at least some overlap in the features that are most important
+to the models, which is a good sign that the synthetic data is capturing 
+important patterns in the real data.
+
+\begin{table*}[h!]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{rank} & \multicolumn{2}{c|}{\textbf{encryption type}} & \multicolumn{2}{c|}{\textbf{resolution}} \\ \hline
+& \textbf{real / real} & \textbf{synthetic / real} & \textbf{real / real} & \textbf{synthetic / real} \\ \hline
+1 & udp\_sport\_4 & \cellcolor[HTML]{02B021}ipv4\_tl\_13 & ipv4\_ttl\_3 & \cellcolor[HTML]{02B021}ipv4\_cksum\_15 \\ \hline
+2 & udp\_dport\_1 & \cellcolor[HTML]{02B021}ipv4\_tl\_15 & ipv4\_tl\_11 & udp\_dport\_5 \\ \hline
+3 & ipv4\_hl\_3 & \cellcolor[HTML]{02B021}ipv4\_tl\_14 & udp\_len\_13 & tcp\_opt\_83 \\ \hline
+4 & ipv4\_foff\_12 & ipv4\_id\_0 & udp\_cksum\_14 & tcp\_opt\_35 \\ \hline
+5 & ipv4\_tl\_5 & \cellcolor[HTML]{02B021}ipv4\_tl\_11 & ipv4\_cksum\_15 & tcp\_opt\_82 \\ \hline
+6 & udp\_dport\_4 & \cellcolor[HTML]{02B021}ipv4\_tl\_9 & ipv4\_id\_7 & tcp\_dprt\_4 \\ \hline
+7 & ipv4\_tos\_6 & \cellcolor[HTML]{02B021}ipv4\_tl\_12 & tcp\_seq\_10 & tcp\_sprt\_2 \\ \hline
+8 & ipv4\_tl\_13 & \cellcolor[HTML]{02B021}ipv4\_tl\_10 & ipv4\_cksum\_10 & tcp\_dprt\_5 \\ \hline
+9 & ipv4\_proto\_5 & \cellcolor[HTML]{02B021}ipv4\_tl\_8 & tcp\_wsize\_12 & tcp\_sprt\_7 \\ \hline
+10 & ipv4\_tl\_10 & tcp\_ackn\_8 & ipv4\_tl\_5 & \cellcolor[HTML]{02B021}ipv4\_cksum\_0 \\ \hline
+\end{tabular}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{rank} & \multicolumn{2}{c|}{\textbf{streaming}} & \multicolumn{2}{c|}{\textbf{transport}} \\ \hline
+& \textbf{real / real} & \textbf{synthetic / real} & \textbf{real / real} & \textbf{synthetic / real} \\ \hline
+1 & udp\_len\_5 & \cellcolor[HTML]{02B021}ipv4\_cksum\_15 & udp\_len\_12 & \cellcolor[HTML]{02B021}ipv4\_tl\_2 \\ \hline
+2 & ipv4\_tl\_13 & \cellcolor[HTML]{02B021}ipv4\_tl\_1 & ipv4\_tl\_9 & ipv6\_hl\_4 \\ \hline
+3 & ipv4\_id\_13 & udp\_dport\_7 & tcp\_sprt\_15 & ipv4\_opt\_245 \\ \hline
+4 & udp\_cksum\_0 & udp\_dport\_3 & udp\_sport\_3 & ipv6\_fl\_2 \\ \hline
+5 & ipv4\_id\_14 & udp\_dport\_11 & udp\_sport\_15 & ipv6\_hl\_0 \\ \hline
+6 & ipv4\_tl\_11 & udp\_dport\_10 & udp\_dport\_15 & ipv6\_hl\_6 \\ \hline
+7 & udp\_cksum\_2 & tcp\_sprt\_15 & udp\_sport\_14 & ipv4\_opt\_317 \\ \hline
+8 & tcp\_seq\_15 & udp\_dport\_9 & udp\_dport\_11 & ipv6\_len\_8 \\ \hline
+9 & ipv4\_cksum\_4 & tcp\_opt\_319 & udp\_sport\_11 & ipv6\_hl\_7 \\ \hline
+10 & udp\_cksum\_13 & udp\_sport\_9 & tcp\_sprt\_9 & ipv6\_len\_4 \\ \hline
+\end{tabular}
+\caption{10 most important RF features for real/real and synthetic/real models, with shared header fields highlighted in green}
+\label{tab:recreated_table_part2}
+\end{table*}
+\FloatBarrier
+
+% \begin{acks}
+% To Alefiya, for the continual guidance and enthusiam all throughout
+% the project
+% \end{acks}
 
 %%
 %% The next two lines define the bibliography style to be used, and
 %% the bibliography file.
 \bibliographystyle{ACM-Reference-Format}
-\bibliography{sample-base}
-
-%%
-%% If your work has an appendix, this is the place to put it.
-\appendix
+\bibliography{torchlight.bib}
 \end{document}
-\endinput

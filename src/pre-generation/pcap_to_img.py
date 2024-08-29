@@ -126,7 +126,6 @@ for file in os.listdir(pcap_dir):
             for col in cols:
                 df[col] = df[col].apply(int_to_rgba)
 
-            print(df.shape)
             output_file = f"{img_dir}/{filename}.png"
             dataframe_to_png(df, output_file)
         except Exception as e:
